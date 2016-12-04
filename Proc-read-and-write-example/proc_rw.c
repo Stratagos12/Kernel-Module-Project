@@ -13,13 +13,13 @@ static char *msg = 0;
 static ssize_t
 read_proc (struct file *filp, char __user * buf, size_t count, loff_t * offp)
 {
-  //printk (KERN_INFO ");
   if (count > temp)
     {
       count = temp;
     }
   temp = temp - count;
   copy_to_user (buf, msg, count);
+  printk (KERN_INFO "Message read\n");
   if (count == 0)
     temp = len;
 
@@ -31,13 +31,15 @@ write_proc (struct file *filp, const char __user * buf, size_t count,
 	    loff_t * offp)
 {
 
-  if (msg == 0 || count > 100)
+  if (msg == 0 || count >= 100)
     {
       printk (KERN_INFO " either msg is 0 or count >100\n");
     }
-
+  
   // you have to move data from user space to kernel buffer
   copy_from_user (msg, buf, count);
+  msg[count] = '\0';
+  printk (KERN_INFO "Message Recieved %s\n", msg);
   len = count;
   temp = len;
   return count;
@@ -56,7 +58,7 @@ create_new_proc_entry (void)
   msg = kmalloc (100 * sizeof (char), GFP_KERNEL);
   if (msg == 0)
     {
-      printk (KERN_INFO "why is msg 0 \n");
+      printk (KERN_EMERG "why is msg 0 \n");
     }
 }
 
